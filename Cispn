@@ -1080,60 +1080,39 @@ end)
 })
 
 local Button = MainTab:CreateButton({
-   Name = "ReWind",
+   Name = "Trip",
    Callback = function()
-        local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+        --[[ WARNING:
+     Heads up! This script has not been verified by ScriptBlox.
+     Use at your own risk! 
+]]
 
-local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local root = char:WaitForChild("HumanoidRootPart")
+local UserInputService = game:GetService("UserInputService")
+local plr = game.Players.LocalPlayer
 
-local key = Enum.KeyCode.C
-local history = {}
-local recordingInterval = 0.05
-local maxHistoryTime = 3
-local rewinding = false
-
--- Record past positions
-task.spawn(function()
-	while true do
-		if not rewinding then
-			table.insert(history, 1, root.CFrame)
-			if #history > maxHistoryTime / recordingInterval then
-				table.remove(history)
-			end
-		end
-		task.wait(recordingInterval)
-	end
-end)
-
--- Rewind when key held
-local function startRewind()
-	rewinding = true
-	while rewinding and #history > 0 do
-		root.CFrame = history[1]
-		table.remove(history, 1)
-		task.wait(recordingInterval)
-	end
+local function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart")
+        or char:FindFirstChild("Torso")
+        or char:FindFirstChild("UpperTorso")
 end
 
--- Stop rewind
-local function stopRewind()
-	rewinding = false
+local function trip()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = getRoot(char)
+
+    if hum and root then
+        hum:ChangeState(0)
+        root.Velocity = root.CFrame.LookVector * 30
+    end
 end
 
--- Key input
-UIS.InputBegan:Connect(function(input, gp)
-	if input.KeyCode == key and not gp then
-		startRewind()
-	end
-end)
-
-UIS.InputEnded:Connect(function(input, gp)
-	if input.KeyCode == key then
-		stopRewind()
-	end
+-- 🔵 Trigger trip when pressing T
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.T then
+        trip()
+    end
 end)
 
    end,
