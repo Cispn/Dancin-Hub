@@ -1080,6 +1080,79 @@ end)
 })
 
 local Button = MainTab:CreateButton({
+   Name = "ReWind",
+   Callback = function()
+        --// Rewind Settings
+local rewindKey = Enum.KeyCode.C
+local recordingDuration = 3            -- seconds of movement to record
+local recordInterval = 0.05            -- how often to capture player position
+local rewindSpeed = 1                  -- 1 = normal backward speed, higher = faster
+
+--// Services
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+--// Player & Character
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local root = character:WaitForChild("HumanoidRootPart")
+
+--// Storage for recorded history
+local history = {}
+local isRewinding = false
+
+--// Record player movement
+task.spawn(function()
+	while true do
+		if not isRewinding then
+			table.insert(history, 1, root.CFrame)
+			if #history > (recordingDuration / recordInterval) then
+				table.remove(history) -- keep memory small
+			end
+		end
+		task.wait(recordInterval)
+	end
+end)
+
+--// Begin rewind
+local function startRewind()
+	if #history < 2 then return end
+	isRewinding = true
+
+	while isRewinding and #history > 0 do
+		root.Anchored = true
+		root.CFrame = history[1]
+		table.remove(history, 1)
+		task.wait(recordInterval / rewindSpeed)
+	end
+
+	root.Anchored = false
+	isRewinding = false
+end
+
+--// Stop rewind
+local function stopRewind()
+	isRewinding = false
+end
+
+--// Key handling
+UIS.InputBegan:Connect(function(input, gp)
+	if gp then return end
+	if input.KeyCode == rewindKey then
+		startRewind()
+	end
+end)
+
+UIS.InputEnded:Connect(function(input, gp)
+	if input.KeyCode == rewindKey then
+		stopRewind()
+	end
+end)
+
+   end,
+})
+
+local Button = MainTab:CreateButton({
    Name = "AK",
    Callback = function()
         loadstring(game:HttpGet("https://akadmin-bzk.pages.dev/Mains/Enjoy.lua"))()
