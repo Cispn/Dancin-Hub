@@ -22,7 +22,7 @@ local Window = Rayfield:CreateWindow({
       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
    },
 
-KeySystem = true, -- Set this to true to use our key system
+KeySystem = False, -- Set this to true to use our key system
    KeySettings = {
       Title = "Dancin Hub", -- Updated Title
       Subtitle = "",
@@ -1029,6 +1029,13 @@ local Button = MainTab:CreateButton({
    Name = "SystemBroken",
    Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/script"))()
+   end,
+})
+
+local Button = MainTab:CreateButton({
+   Name = "Copy",
+   Callback = function()
+        loadstring(game:HttpGet("https://github.com/Venturazh/copyanim/raw/refs/heads/main/copyanim",true))()
    end,
 })
 
