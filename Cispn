@@ -1082,69 +1082,56 @@ end)
 local Button = MainTab:CreateButton({
    Name = "ReWind",
    Callback = function()
-        --// Rewind Settings
-local rewindKey = Enum.KeyCode.C
-local recordingDuration = 3            -- seconds of movement to record
-local recordInterval = 0.05            -- how often to capture player position
-local rewindSpeed = 1                  -- 1 = normal backward speed, higher = faster
-
---// Services
-local UIS = game:GetService("UserInputService")
+        local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
---// Player & Character
 local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local root = character:WaitForChild("HumanoidRootPart")
+local char = player.Character or player.CharacterAdded:Wait()
+local root = char:WaitForChild("HumanoidRootPart")
 
---// Storage for recorded history
+local key = Enum.KeyCode.C
 local history = {}
-local isRewinding = false
+local recordingInterval = 0.05
+local maxHistoryTime = 3
+local rewinding = false
 
---// Record player movement
+-- Record past positions
 task.spawn(function()
 	while true do
-		if not isRewinding then
+		if not rewinding then
 			table.insert(history, 1, root.CFrame)
-			if #history > (recordingDuration / recordInterval) then
-				table.remove(history) -- keep memory small
+			if #history > maxHistoryTime / recordingInterval then
+				table.remove(history)
 			end
 		end
-		task.wait(recordInterval)
+		task.wait(recordingInterval)
 	end
 end)
 
---// Begin rewind
+-- Rewind when key held
 local function startRewind()
-	if #history < 2 then return end
-	isRewinding = true
-
-	while isRewinding and #history > 0 do
-		root.Anchored = true
+	rewinding = true
+	while rewinding and #history > 0 do
 		root.CFrame = history[1]
 		table.remove(history, 1)
-		task.wait(recordInterval / rewindSpeed)
+		task.wait(recordingInterval)
 	end
-
-	root.Anchored = false
-	isRewinding = false
 end
 
---// Stop rewind
+-- Stop rewind
 local function stopRewind()
-	isRewinding = false
+	rewinding = false
 end
 
---// Key handling
+-- Key input
 UIS.InputBegan:Connect(function(input, gp)
-	if gp then return end
-	if input.KeyCode == rewindKey then
+	if input.KeyCode == key and not gp then
 		startRewind()
 	end
 end)
 
 UIS.InputEnded:Connect(function(input, gp)
-	if input.KeyCode == rewindKey then
+	if input.KeyCode == key then
 		stopRewind()
 	end
 end)
