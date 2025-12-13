@@ -406,19 +406,54 @@ local function LoadHub()
 	--------------------------------------------------------
 	-- HOME BUTTON FUNCTIONS
 	--------------------------------------------------------
-	local tpBtn = makeBtn("F to Teleport", 60)
-	tpBtn.MouseButton1Click:Connect(function()
-		local mouse = player:GetMouse()
-		UIS.InputBegan:Connect(function(i,g)
-			if not g and i.KeyCode == Enum.KeyCode.F then
-				local char = player.Character
-				local root = char and char:FindFirstChild("HumanoidRootPart")
-				if root then
-					root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0,5,0))
-				end
-			end
-		end)
+local tpBtn = makeBtn("F to Teleport", 60)
+
+tpBtn.MouseButton1Click:Connect(function()
+
+	-- Services
+	local Players = game:GetService("Players")
+	local UserInputService = game:GetService("UserInputService")
+	local TweenService = game:GetService("TweenService")
+	local player = Players.LocalPlayer
+	local mouse = player:GetMouse()
+
+	-- Tween settings (set time to 0 for instant teleport)
+	local tweenInfo = TweenInfo.new(
+		0.15,
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.Out
+	)
+
+	local function teleportToMouse()
+		local character = player.Character
+		if not character then return end
+
+		local root = character:FindFirstChild("HumanoidRootPart")
+		if not root then return end
+
+		if not mouse.Hit then return end
+
+		-- Offset so you don't get stuck in the ground
+		local targetCFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+
+		-- Tween instead of MoveTo (keeps emotes playing)
+		local tween = TweenService:Create(root, tweenInfo, {
+			CFrame = targetCFrame
+		})
+
+		tween:Play()
+	end
+
+	-- Press F to teleport
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if input.KeyCode == Enum.KeyCode.F then
+			teleportToMouse()
+		end
 	end)
+
+end)
+
 
 	local tripBtn = makeBtn("T to Trip", 100)
 	tripBtn.MouseButton1Click:Connect(function()
