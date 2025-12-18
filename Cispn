@@ -552,7 +552,8 @@ end)
 	-- Ak Admin
 	local akBtn = makeExBtn("Ak Admin", 180)
 	akBtn.MouseButton1Click:Connect(function()
-		loadstring(game:HttpGet("https://akadmin-bzk.pages.dev/Mains/Enjoy.lua"))()
+		loadstring(game:HttpGet("https://absent.wtf/AKADMIN.lua"))()
+
 	end)
 
 	-- Animation Copy
