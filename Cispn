@@ -1,3 +1,4 @@
+
 --// DANCIN HUB — FINAL DARK UI WITH ADVANCED KEY + PERM KEYS //--
 
 local Players   = game:GetService("Players")
@@ -559,7 +560,8 @@ end)
 	-- Animation Copy
 	local animCopyBtn = makeExBtn("Animation Copy", 220)
 	animCopyBtn.MouseButton1Click:Connect(function()
-		loadstring(game:HttpGet("https://github.com/Venturazh/copyanim/raw/refs/heads/main/copyanim", true))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Cispn/Dancin-Hub/refs/heads/main/Copy"))()
+
 	end)
 
 	--------------------------------------------------------
