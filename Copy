@@ -1,0 +1,198 @@
+-- SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local localPlayer = Players.LocalPlayer
+
+-------------------------------------------------
+-- GUI
+-------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "AnimationCopyUI"
+gui.Parent = localPlayer:WaitForChild("PlayerGui")
+
+-------------------------------------------------
+-- MAIN BAR (FLAT BLACK)
+-------------------------------------------------
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromScale(0.11, 0.028)
+frame.Position = UDim2.fromScale(0.445, 0.05)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,5)
+
+-------------------------------------------------
+-- PADDING
+-------------------------------------------------
+local padding = Instance.new("UIPadding")
+padding.PaddingLeft = UDim.new(0,6)
+padding.PaddingRight = UDim.new(0,6)
+padding.PaddingTop = UDim.new(0,2)
+padding.PaddingBottom = UDim.new(0,2)
+padding.Parent = frame
+
+-------------------------------------------------
+-- TITLE
+-------------------------------------------------
+local title = Instance.new("TextLabel")
+title.Text = "Copy"
+title.Size = UDim2.fromScale(0.38,1)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(235,235,235)
+title.Font = Enum.Font.GothamMedium
+title.TextScaled = false
+title.TextSize = 11
+title.Parent = frame
+
+-------------------------------------------------
+-- ARROW (VISIBLE, WHITE)
+-------------------------------------------------
+local arrow = Instance.new("TextButton")
+arrow.Text = "▼"
+arrow.Size = UDim2.fromScale(0.16,1)
+arrow.Position = UDim2.fromScale(0.38,0)
+arrow.BackgroundTransparency = 1
+arrow.TextColor3 = Color3.fromRGB(255,255,255)
+arrow.Font = Enum.Font.GothamBold
+arrow.TextScaled = false
+arrow.TextSize = 12
+arrow.Parent = frame
+
+-------------------------------------------------
+-- STOP BUTTON (FLAT, NO GLOW)
+-------------------------------------------------
+local stopBtn = Instance.new("TextButton")
+stopBtn.Text = "STOP"
+stopBtn.Size = UDim2.fromScale(0.32,0.8)
+stopBtn.Position = UDim2.fromScale(0.64,0.1)
+stopBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+stopBtn.TextColor3 = Color3.fromRGB(230,230,230)
+stopBtn.Font = Enum.Font.GothamBold
+stopBtn.TextScaled = false
+stopBtn.TextSize = 10
+stopBtn.Parent = frame
+Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0,4)
+
+-------------------------------------------------
+-- DROPDOWN (ATTACHED, FLAT)
+-------------------------------------------------
+local listFrame = Instance.new("ScrollingFrame")
+listFrame.Size = UDim2.new(1, 0, 0, 0)
+listFrame.Position = UDim2.new(0, 0, 1, 2)
+listFrame.CanvasSize = UDim2.new(0,0,0,0)
+listFrame.ScrollBarImageTransparency = 0.4
+listFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+listFrame.BorderSizePixel = 0
+listFrame.Visible = false
+listFrame.Parent = frame
+Instance.new("UICorner", listFrame).CornerRadius = UDim.new(0,5)
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0,3)
+layout.Parent = listFrame
+
+-------------------------------------------------
+-- ANIMATION COPY LOGIC
+-------------------------------------------------
+local copying = false
+local targetAnimator
+local localAnimator
+local playingTracks = {}
+
+local function getAnimator(char)
+	local hum = char:WaitForChild("Humanoid")
+	return hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+end
+
+local function stopCopying()
+	copying = false
+	targetAnimator = nil
+	for _, t in pairs(playingTracks) do t:Stop() end
+	playingTracks = {}
+end
+
+local function startCopying(player)
+	stopCopying()
+	localAnimator = getAnimator(localPlayer.Character or localPlayer.CharacterAdded:Wait())
+	targetAnimator = getAnimator(player.Character or player.CharacterAdded:Wait())
+	copying = true
+end
+
+RunService.RenderStepped:Connect(function()
+	if not copying or not targetAnimator or not localAnimator then return end
+
+	for _, track in ipairs(targetAnimator:GetPlayingAnimationTracks()) do
+		local id = track.Animation.AnimationId
+		if not playingTracks[id] then
+			local anim = Instance.new("Animation")
+			anim.AnimationId = id
+			local t = localAnimator:LoadAnimation(anim)
+			t:Play()
+			t.TimePosition = track.TimePosition
+			t:AdjustSpeed(track.Speed)
+			playingTracks[id] = t
+		end
+	end
+
+	for id, t in pairs(playingTracks) do
+		local still = false
+		for _, tr in ipairs(targetAnimator:GetPlayingAnimationTracks()) do
+			if tr.Animation.AnimationId == id then still = true end
+		end
+		if not still then t:Stop() playingTracks[id] = nil end
+	end
+end)
+
+-------------------------------------------------
+-- PLAYER LIST
+-------------------------------------------------
+local function refreshList()
+	for _, c in ipairs(listFrame:GetChildren()) do
+		if c:IsA("TextButton") then c:Destroy() end
+	end
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= localPlayer then
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(1, -6, 0, 18)
+			btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+			btn.TextColor3 = Color3.fromRGB(235,235,235)
+			btn.Font = Enum.Font.Gotham
+			btn.TextScaled = false
+			btn.TextSize = 10
+			btn.Text = p.DisplayName ~= "" and p.DisplayName or p.Name
+			btn.Parent = listFrame
+			Instance.new("UICorner", btn).CornerRadius = UDim.new(0,4)
+
+			btn.MouseButton1Click:Connect(function()
+				startCopying(p)
+				listFrame.Visible = false
+				arrow.Text = "▼"
+			end)
+		end
+	end
+
+	task.wait()
+	listFrame.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 4)
+	listFrame.Size = UDim2.new(1, 0, 0, math.min(120, layout.AbsoluteContentSize.Y + 4))
+end
+
+Players.PlayerAdded:Connect(refreshList)
+Players.PlayerRemoving:Connect(refreshList)
+refreshList()
+
+-------------------------------------------------
+-- ARROW TOGGLE
+-------------------------------------------------
+arrow.MouseButton1Click:Connect(function()
+	listFrame.Visible = not listFrame.Visible
+	arrow.Text = listFrame.Visible and "▲" or "▼"
+end)
+
+-------------------------------------------------
+-- STOP
+-------------------------------------------------
+stopBtn.MouseButton1Click:Connect(stopCopying)
