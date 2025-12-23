@@ -619,6 +619,14 @@ end)
 	end)
 
 	--------------------------------------------------------
+	-- EMOTES BUTTONS (GUI 1)
+	--------------------------------------------------------
+	local gui1Btn = makeEmoteBtn("GUI 2", 100)
+	gui1Btn.MouseButton1Click:Connect(function()
+		loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Gi7331/scripts/main/Emote.lua"))()
+	end)
+
+	--------------------------------------------------------
 	-- CREDITS TITLE
 	--------------------------------------------------------
 	local crTitle = Instance.new("TextLabel", credits)
