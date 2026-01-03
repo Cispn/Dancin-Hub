@@ -12972,6 +12972,12 @@ Scale:GetPropertyChangedSignal("Scale"):Connect(function()
 	end
 end)
 
+-- Force shade1 and shade2 to pure black
+currentShade1 = Color3.fromRGB(0, 0, 0)   -- Pure black for main backgrounds
+currentShade2 = Color3.fromRGB(0, 0, 0)   -- Pure black for accents/titles
+-- Optional: make shade3 a very dark gray if you want slight contrast on toggles/inputs
+currentShade3 = Color3.fromRGB(20, 20, 20)
+
 updateColors(currentShade1,shade1)
 updateColors(currentShade2,shade2)
 updateColors(currentShade3,shade3)
