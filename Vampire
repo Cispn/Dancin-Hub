@@ -1,0 +1,45 @@
+-- Vampire Animation Script (Improved for reliability)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Function to apply Vampire animation
+local function applyVampireAnimation(char)
+    local humanoid = char:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    
+    local animate = char:FindFirstChild("Animate")
+    if not animate then return end
+    
+    -- Disable Animate script to allow changes
+    animate.Disabled = true
+    
+    -- Stop any playing animations
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        track:Stop()
+    end
+    
+    -- Set Vampire animation IDs
+    animate.idle.Animation1.AnimationId = "rbxassetid://1083445855"
+    animate.idle.Animation2.AnimationId = "rbxassetid://1083450166"
+    animate.walk.WalkAnim.AnimationId = "rbxassetid://1083473930"
+    animate.run.RunAnim.AnimationId = "rbxassetid://1083462077"
+    animate.jump.JumpAnim.AnimationId = "rbxassetid://1083455352"
+    animate.climb.ClimbAnim.AnimationId = "rbxassetid://1083439238"
+    animate.fall.FallAnim.AnimationId = "rbxassetid://1083443587"
+    
+    -- Re-enable Animate script
+    animate.Disabled = false
+    
+    -- Force reload
+    humanoid:ChangeState(Enum.HumanoidStateType.Running)
+    print("Vampire animation applied successfully!")
+end
+
+-- Apply on current character
+if player.Character then
+    applyVampireAnimation(player.Character)
+end
+
+-- Apply on every respawn
+player.CharacterAdded:Connect(applyVampireAnimation)
