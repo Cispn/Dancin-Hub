@@ -1,0 +1,45 @@
+-- Ghost Animation Script (Improved for reliability)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Function to apply Ghost animation
+local function applyGhostAnimation(char)
+    local humanoid = char:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    
+    local animate = char:FindFirstChild("Animate")
+    if not animate then return end
+    
+    -- Disable Animate script to allow changes
+    animate.Disabled = true
+    
+    -- Stop any playing animations
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        track:Stop()
+    end
+    
+    -- Set Ghost animation IDs
+    animate.idle.Animation1.AnimationId = "rbxassetid://616006778"
+    animate.idle.Animation2.AnimationId = "rbxassetid://616008087"
+    animate.walk.WalkAnim.AnimationId = "rbxassetid://616010382"
+    animate.run.RunAnim.AnimationId = "rbxassetid://616013216"
+    animate.jump.JumpAnim.AnimationId = "rbxassetid://616008936"
+    animate.climb.ClimbAnim.AnimationId = "rbxassetid://616003713"
+    animate.fall.FallAnim.AnimationId = "rbxassetid://616005863"
+    
+    -- Re-enable Animate script
+    animate.Disabled = false
+    
+    -- Force reload
+    humanoid:ChangeState(Enum.HumanoidStateType.Running)
+    print("Ghost animation applied successfully!")
+end
+
+-- Apply on current character
+if player.Character then
+    applyGhostAnimation(player.Character)
+end
+
+-- Apply on every respawn
+player.CharacterAdded:Connect(applyGhostAnimation)
